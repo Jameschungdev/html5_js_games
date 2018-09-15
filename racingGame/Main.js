@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-	<meta content="utf-8" http-equiv="encoding">
-</head>
-
-<body>
-<canvas id="gameCanvas" width="800" height="600"></canvas>
-
-<script>
 var carPic = document.createElement("img");
 var carPicLoaded = false;
 
@@ -16,6 +5,11 @@ var carX = 75;
 var carY = 75;
 var carAng = 0;
 var carSpeed = 0;
+
+const GROUNDSPEED_DECAY_MULT = 0.94;
+const DRIVE_POWER = 0.5;
+const REVERSE_POWER = 0.2;
+const TURN_RATE = 0.03;
 
 const TRACK_W = 40;
 const TRACK_H = 40;
@@ -38,6 +32,10 @@ var trackGrid = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				 1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 				 ];
+
+const TRACK_ROAD = 0;
+const TRACK_WALL = 1;
+const TRACK_PLAYERSTART = 2;
 
 var canvas, canvasContext;
 
@@ -135,8 +133,9 @@ function carReset() {
 
 			var arrayIndex = rowColToArrayIndex(j,i);
 
-			if(trackGrid[arrayIndex]==2) {
-				trackGrid[arrayIndex] = 0;
+			if(trackGrid[arrayIndex]==TRACK_PLAYERSTART) {
+				trackGrid[arrayIndex] = TRACK_ROAD;
+				carAng = -0.5*Math.PI;
 				carX = j*TRACK_W+TRACK_W/2;
 				carY = i*TRACK_H+TRACK_H/2;
 			}
@@ -145,17 +144,20 @@ function carReset() {
 }
 
 function carMove(){
+
+	carSpeed*=GROUNDSPEED_DECAY_MULT;
+
 	if(keyHeld_Gas){
-		carSpeed+=0.2;
+		carSpeed+=DRIVE_POWER;
 	}
 	if(keyHeld_Reverse){
-		carSpeed-=0.2;
+		carSpeed-=REVERSE_POWER;
 	}
 	if(keyHeld_TurnLeft){
-		carAng-=0.04;
+		carAng-=TURN_RATE;
 	}
 	if(keyHeld_TurnRight){
-		carAng+=0.04;
+		carAng+=TURN_RATE;
 	}
 
 	carX += Math.cos(carAng)*carSpeed;
@@ -163,11 +165,11 @@ function carMove(){
 	//carAng += 0.02;
 }
 
-function isTrackAtColRow(col, row){
+function isWallAtColRow(col, row){
 	if(col>=0 && col<TRACK_COLS && 
 		row>=0 && row<TRACK_ROWS){	
 			var trackIndexUnderCoord = rowColToArrayIndex(col,row);
-			return (trackGrid[trackIndexUnderCoord]==1);
+			return (trackGrid[trackIndexUnderCoord]==TRACK_WALL);
 		} else {
 			return false;
 		}
@@ -182,8 +184,12 @@ function carTrackHandling(){
 	if(carTrackCol>=0 && carTrackCol<TRACK_COLS && 
 		carTrackRow>=0 && carTrackRow<TRACK_ROWS){
 			
-			if(isTrackAtColRow(carTrackCol,carTrackRow)){
-				carSpeed*=-1;
+			if(isWallAtColRow(carTrackCol,carTrackRow)){
+
+				carX -= Math.cos(carAng)*carSpeed;
+				carY -= Math.sin(carAng)*carSpeed;
+
+				carSpeed*=-0.5;
 
 			} // end of track found
 	} // end of valid col and row
@@ -207,8 +213,8 @@ function drawTracks() {
 
 			var arrayIndex = rowColToArrayIndex(j,i);
 
-			if(trackGrid[arrayIndex]==1) {
-				colorRect(TRACK_W*j,TRACK_H*i, TRACK_W-TRACK_GAP,TRACK_H-TRACK_GAP, 'blue');
+			if(trackGrid[arrayIndex]==TRACK_WALL) {
+				colorRect(TRACK_W*j,TRACK_H*i, TRACK_W-TRACK_GAP,TRACK_H-TRACK_GAP, 'pink');
 			} // end of is this track here
 		} // end of for each track
 }
@@ -257,8 +263,3 @@ function colorText(showWords, textX,textY, fillColor) {
 	canvasContext.fillStyle = fillColor;
 	canvasContext.fillText(showWords, textX, textY);
 }
-
-</script>
-
-</body>
-</html>
