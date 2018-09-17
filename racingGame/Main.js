@@ -13,12 +13,7 @@ window.onload = function() {
 	setInterval(updateAll, 1000/framesPerSecond);
 
 	setupInput();
-
-	carPic.onload = function(){
-		carPicLoaded = true;
-	}
-	carPic.src = "racingGame_Car.png";
-
+	carImageLoad();
 	carReset();
 }
 
