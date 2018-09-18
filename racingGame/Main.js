@@ -1,7 +1,3 @@
-
-
-
-
 var canvas, canvasContext;
 
 
