@@ -1,5 +1,3 @@
-var carPic = document.createElement("img");
-var carPicLoaded = false;
 
 var carX = 75;
 var carY = 75;
@@ -11,12 +9,6 @@ const DRIVE_POWER = 0.5;
 const REVERSE_POWER = 0.2;
 const TURN_RATE = 0.03;
 
-function carImageLoad(){
-	carPic.onload = function(){
-		carPicLoaded = true;
-	}
-	carPic.src = "racingGame_Car.png";
-}
 
 function carReset() {
 	for(var i=0;i<TRACK_ROWS;i++){
@@ -58,7 +50,5 @@ function carMove(){
 
 function carDraw() {
 	//colorCircle(carX,carY, 10, 'white'); // draw car
-	if (carPicLoaded) {
 		drawBitmapCenteredWithRotation(carPic, carX, carY, carAng);
-	}
 }
